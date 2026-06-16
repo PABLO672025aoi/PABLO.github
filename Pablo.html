@@ -1,1 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Studio Web - Dashboard & Editor</title>
+    <!-- Tailwind CSS para design moderno -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- FontAwesome para ícones -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <!-- Google Fonts -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <!-- Three.js e OrbitControls -->
+    <script src="https://cloudflare.com"></script>
+    <script src="https://jsdelivr.net"></script>
+    <!-- Socket.io Client -->
+    <script src="https://cloudflare.com"></script>
 
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Scrollbar customizado */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e1e2f; }
+        ::-webkit-scrollbar-thumb { background: #3f3f5f; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-[#0b0b14] text-gray-100 min-h-screen flex flex-col overflow-x-hidden">
+
+    <!-- Topbar estilo Roblox Developer -->
+    <header class="bg-[#131324] border-b border-[#23233d] px-6 py-3 flex justify-between items-center shadow-lg sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-red-600 to-orange-500 w-9 h-9 rounded-lg flex items-center justify-center font-black text-xl tracking-tighter shadow-md">R</div>
+            <div>
+                <h1 class="text-md font-bold tracking-wide">ROBLOX <span class="text-orange-500 font-medium text-xs bg-orange-500/10 px-1.5 py-0.5 rounded ml-1 border border-orange-500/20">STUDIO WEB</span></h1>
+                <p class="text-[10px] text-gray-400">Ambiente de Desenvolvimento V2.5</p>
+            </div>
+        </div>
+        <!-- Abas de Navegação Principais -->
+        <nav class="flex gap-1 bg-[#0b0b14] p-1 rounded-xl border border-[#23233d]">
+            <button onclick="switchTab('editor')" id="btn-tab-editor" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 bg-orange-600 text-white shadow">
+                <i class="fa-solid fa-cube mr-1.5"></i>Editor 3D
+            </button>
+            <button onclick="switchTab('meus-jogos')" id="btn-tab-meus-jogos" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition-all duration-200">
+                <i class="fa-solid fa-gamepad mr-1.5"></i>Meus Jogos
+            </button>
+            <button onclick="switchTab('ranking')" id="btn-tab-ranking" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition-all duration-200">
+                <i class="fa-solid fa-trophy mr-1.5"></i>Ranking
+            </button>
+        </nav>
+        <div class="flex items-center gap-3">
+            <span class="text-xs text-gray-400 hidden sm:inline"><i class="fa-solid fa-circle text-green-500 text-[8px] mr-1.5 animate-pulse"></i>Modo Desenvolvedor</span>
+            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center font-bold text-xs text-white ring-2 ring-[#23233d]">U</div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 flex relative">
+        
+        <!-- ABA 1: EDITOR 3D -->
+        <div id="tab-editor" class="tab-content flex-1 flex flex-col md:flex-row relative h-[calc(100vh-62px)]">
+            
+            <!-- Painel de Controle Esquerdo (Editor) -->
+            <div class="w-full md:w-80 bg-[#131324] border-r border-[#23233d] p-5 flex flex-col gap-5 z-20 md:h-full overflow-y-auto">
+                <div>
+                    <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2 mb-1">
+                        <i class="fa-solid fa-sliders text-orange-500"></i>Editor Simplificado
+                    </h2>
+                    <p class="text-xs text-gray-400">Adicione elementos e gerencie sua cena em tempo real.</p>
+                </div>
+
+                <div class="flex flex-col gap-2.5">
+                    <button id="btn-add-cube" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold py-3 px-4 rounded-xl shadow-md active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-plus-circle text-sm"></i> Adicionar Cubo
+                    </button>
+                    <button id="btn-save-scene" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold py-3 px-4 rounded-xl shadow-md active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up text-sm"></i> Publicar / Salvar Cena (JSON)
+                    </button>
+                </div>
+
+                <!-- Live JSON Monitor -->
+                <div class="flex-1 flex flex-col min-h-[150px]">
+                    <span class="text-[11px] font-bold text-gray-400 mb-1.5 uppercase tracking-wide flex items-center justify-between">
+                        <span>Cena Output (Live JSON)</span>
+                        <i class="fa-solid fa-code text-gray-500"></i>
+                    </span>
+                    <textarea id="json-preview" readonly class="w-full flex-1 bg-[#0b0b14] border border-[#23233d] rounded-xl p-3 text-[11px] font-mono text-cyan-400 resize-none outline-none focus:border-cyan-500/50 leading-relaxed" placeholder="Adicione objetos para gerar a estrutura de dados..."></textarea>
+                </div>
+            </div>
+
+            <!-- Canvas Container 3D -->
+            <div class="flex-1 relative bg-[#07070c] h-full">
+                <div id="canvas-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+                
+                <!-- Dica flutuante de navegação -->
+                <div class="absolute top-4 right-4 bg-[#131324]/80 backdrop-blur-md border border-[#23233d] px-3 py-1.5 rounded-lg text-[11px] text-gray-300 pointer-events-none flex items-center gap-2 shadow-lg">
+                    <i class="fa-solid fa-circle-info text-blue-400"></i>
+                    <span>Arraste o mouse para girar a câmera | Scroll para zoom</span>
+                </div>
+            </div>
+
+            <!-- Chat Flutuante Integrado -->
+            <div class="w-full md:w-80 md:absolute md:bottom-4 md:right-4 bg-[#131324]/95 backdrop-blur-md border border-[#23233d] md:rounded-2xl shadow-2xl flex flex-col z-30 h-72 md:h-80 overflow-hidden">
+                <!-- Cabeçalho Chat -->
+                <div class="px-4 py-3 bg-[#19192e] border-b border-[#23233d] flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <span id="chat-status-dot" class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        <span class="text-xs font-bold tracking-wide">Chat da Sala</span>
+                    </div>
+                    <span id="chat-status-text" class="text-[10px] text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-500/10">Verificando...</span>
+                </div>
+                <!-- Corpo Chat -->
+                <div id="chat-messages" class="flex-1 p-4 overflow-y-auto flex flex-col gap-2.5 text-xs">
+                    <!-- Mensagens entram via JS -->
+                </div>
+                <!-- Input Chat -->
+                <form id="chat-form" class="p-3 bg-[#131324] border-t border-[#23233d] flex gap-2">
+                    <input type="text" id="chat-input" placeholder="Digite sua mensagem..." autocomplete="off" class="flex-1 bg-[#0b0b14] border border-[#23233d] text-xs rounded-xl px-3.5 py-2.5 text-white placeholder-gray-500 outline-none focus:border-orange-500/50 transition-all">
+                    <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-4 rounded-xl transition-all flex items-center justify-center cursor-pointer active:scale-95 text-xs shadow-md">
+                        Enviar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ABA 2: MEUS JOGOS -->
+        <div id="tab-meus-jogos" class="tab-content flex-1 p-6 max-w-6xl mx-auto hidden transition-all duration-300">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gamepad text-orange-500"></i> Meus Jogos Publicados</h2>
+                    <p class="text-xs text-gray-400">Gerencie e edite suas experiências salvas no ecossistema.</p>
+                </div>
+                <button onclick="switchTab('editor')" class="bg-orange-600 hover:bg-orange-500 text-xs font-bold px-4 py-2.5 rounded-xl shadow transition-all cursor-pointer">
+                    <i class="fa-solid fa-plus mr-1"></i> Criar Novo Jogo
+                </button>
+            </div>
+            
+            <!-- Grid de Jogos -->
+            <div id="games-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                <!-- Injetado dinamicamente via JS -->
+            </div>
+        </div>
+
+        <!-- ABA 3: RANKING -->
+        <div id="tab-ranking" class="tab-content flex-1 p-6 max-w-4xl mx-auto hidden transition-all duration-300">
+            <div class="mb-6">
+              
